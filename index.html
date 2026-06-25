@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบฟอร์มบันทึกประวัติอาหาร – โรงพยาบาลสัตว์ คณะสัตวแพทยศาสตร์ มอ.</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+    background: #f5f6fa;
+    color: #2d3748;
+    margin: 0;
+    padding: 16px;
+    font-size: 15px;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.09);
+    padding: 32px 36px 40px;
+  }
+  h1 {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1a4b8c;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+  .subtitle {
+    color: #5a7bb5;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+  }
+
+  /* HN box */
+  .hn-box {
+    background: #eef4ff;
+    border: 2px solid #4a7fcb;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .hn-box label {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #1a4b8c;
+    white-space: nowrap;
+  }
+  .hn-box input[type="text"] {
+    border: 2px solid #4a7fcb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 1.05rem;
+    width: 180px;
+    font-family: inherit;
+    background: #fff;
+  }
+  .hn-box input[type="text"]:focus {
+    outline: none;
+    border-color: #1a4b8c;
+    box-shadow: 0 0 0 3px rgba(26,75,140,0.15);
+  }
+  .btn-load {
+    background: #1a4b8c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-load:hover { background: #133a6e; }
+  .btn-load:disabled { background: #a0aec0; cursor: not-allowed; }
+  .hn-status {
+    font-size: 0.9rem;
+    margin-top: 6px;
+    width: 100%;
+    min-height: 18px;
+  }
+  .hn-status.found { color: #2f855a; font-weight: 600; }
+  .hn-status.notfound { color: #c05621; }
+  .hn-status.loading { color: #4a7fcb; }
+  .hn-status.error { color: #c53030; }
+
+  /* Sections */
+  .section {
+    border-top: 2px solid #e8edf5;
+    margin-top: 28px;
+    padding-top: 20px;
+  }
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a4b8c;
+    margin-bottom: 16px;
+  }
+  .field-group { margin-bottom: 14px; }
+  label.field-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #4a5568;
+    font-size: 0.93rem;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  textarea,
+  select {
+    width: 100%;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #fff;
+    color: #2d3748;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #4a7fcb;
+    box-shadow: 0 0 0 3px rgba(74,127,203,0.12);
+  }
+  textarea { min-height: 70px; resize: vertical; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .radio-group, .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    margin-top: 4px;
+  }
+  .radio-group label, .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 400;
+    color: #2d3748;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+
+  .symptom-row {
+    display: grid;
+    grid-template-columns: 140px auto 1fr;
+    align-items: center;
+    gap: 10px 16px;
+    margin-bottom: 8px;
+  }
+  .symptom-row .sym-label { font-weight: 600; color: #4a5568; font-size: 0.93rem; }
+  .symptom-row .radio-inline { display: flex; gap: 10px; }
+  .symptom-row .radio-inline label { font-weight: 400; }
+  .symptom-detail { font-size: 0.88rem; color: #718096; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th {
+    background: #eef4ff;
+    color: #1a4b8c;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: left;
+    border: 1px solid #c3d4f0;
+  }
+  td {
+    padding: 5px 6px;
+    border: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+  td input[type="text"] { border: 1.5px solid #cbd5e0; font-size: 0.87rem; padding: 4px 7px; }
+  td select { font-size: 0.87rem; padding: 4px 7px; }
+  .btn-addrow {
+    background: none;
+    border: 1.5px dashed #4a7fcb;
+    color: #4a7fcb;
+    border-radius: 6px;
+    padding: 5px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-top: 6px;
+    transition: all 0.2s;
+  }
+  .btn-addrow:hover { background: #eef4ff; }
+  .btn-delrow {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 2px 4px;
+    line-height: 1;
+  }
+
+  /* Vet section */
+  .vet-section {
+    background: #f0f7f0;
+    border: 2px solid #68a76a;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 28px;
+  }
+  .vet-section .section-title { color: #276129; }
+  .vet-calc-row {
+    background: #e6f4e6;
+    border: 1px solid #a0d0a0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: #276129;
+    margin: 10px 0;
+    font-size: 0.95rem;
+  }
+  .vet-calc-row span { font-size: 1.15rem; color: #1a4a1c; }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+    justify-content: center;
+  }
+  .btn {
+    border: none;
+    border-radius: 7px;
+    padding: 11px 22px;
+    font-family: inherit;
+    font-size: 0.97rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-primary { background: #1a4b8c; color: #fff; }
+  .btn-primary:hover { background: #133a6e; }
+  .btn-primary:disabled { background: #a0aec0; cursor: not-allowed; }
+  .btn-secondary { background: #e2e8f0; color: #4a5568; }
+  .btn-secondary:hover { background: #cbd5e0; }
+  .btn-pdf { background: #276129; color: #fff; }
+  .btn-pdf:hover { background: #1d4620; }
+
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2d3748;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+    max-width: 90vw;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { background: #276129; }
+  #toast.error { background: #c53030; }
+
+  @media(max-width: 600px) {
+    .container { padding: 18px 14px 28px; }
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+    .symptom-row { grid-template-columns: 1fr; }
+    .hn-box { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="container">
+  <h1>แบบฟอร์มบันทึกประวัติอาหาร</h1>
+  <div class="subtitle">โรงพยาบาลสัตว์ คณะสัตวแพทยศาสตร์ มหาวิทยาลัยสงขลานครินทร์</div>
+
+  <!-- ===== HN Box ===== -->
+  <div class="hn-box">
+    <label for="hn">เลขที่ HN</label>
+    <input type="text" id="hn" name="hn" placeholder="เช่น HN-2024-0001" autocomplete="off">
+    <button class="btn-load" id="btnLoad" onclick="loadByHN()">🔍 โหลดข้อมูลเดิม</button>
+    <div class="hn-status" id="hnStatus"></div>
+  </div>
+
+  <!-- ===== ข้อมูลทั่วไป ===== -->
+  <div class="section">
+    <div class="section-title">ข้อมูลทั่วไป</div>
+    <div class="row-2">
+      <div class="field-group">
+        <label class="field-label">วัน/เดือน/ปี ที่บันทึกข้อมูล</label>
+        <input type="date" id="recordDate" name="recordDate">
+      </div>
+      <div class="field-group">
+        <label class="field-label">ชื่อเจ้าของ</label>
+        <input type="text" id="ownerName" name="ownerName">
+      </div>
+    </div>
+    <div class="row-3">
+      <div class="field-group">
+        <label class="field-label">ชื่อสัตว์เลี้ยง</label>
+        <input type="text" id="petName" name="petName">
+      </div>
+      <div class="field-group">
+        <label class="field-label">ชนิด / สายพันธุ์</label>
+        <input type="text" id="species" name="species">
+      </div>
+      <div class="field-group">
+        <label class="field-label">อายุ</label>
+        <input type="text" id="age" name="age" placeholder="เช่น 3 ปี 2 เดือน">
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field-group">
+        <label class="field-label">เพศ</label>
+        <div class="radio-group">
+          <label><input type="radio" name="sex" value="ผู้"> ผู้</label>
+          <label><input type="radio" name="sex" value="เมีย"> เมีย</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">การทำหมัน</label>
+        <div class="radio-group">
+          <label><input type="radio" name="neuter" value="ทำหมันแล้ว"> ทำหมันแล้ว</label>
+          <label><input type="radio" name="neuter" value="ยังไม่ได้ทำหมัน"> ยังไม่ได้ทำหมัน</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== รูปร่างและอาการ ===== -->
+  <div class="section">
+    <div class="section-title">รูปร่างและอาการ</div>
+    <div class="field-group">
+      <label class="field-label">1. ท่านคิดว่าสัตว์เลี้ยงของท่านมีรูปร่างเป็นอย่างไร</label>
+      <div class="radio-group">
+        <label><input type="radio" name="bodyShape" value="ผอม"> ผอม</label>
+        <label><input type="radio" name="bodyShape" value="สมส่วน"> สมส่วน</label>
+        <label><input type="radio" name="bodyShape" value="อ้วน"> อ้วน</label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">2. สัตว์เลี้ยงของท่านมีอาการหรือภาวะต่อไปนี้หรือไม่</label>
+      <p style="font-size:0.85rem;color:#718096;margin:2px 0 10px;">ถ้าใช่ โปรดระบุรายละเอียด เช่น ครั้ง/วัน หรือ สัปดาห์ ระยะเวลานับตั้งแต่มีอาการ</p>
+
+      <div class="symptom-row">
+        <span class="sym-label">อาเจียน</span>
+        <div class="radio-inline">
+          <label><input type="radio" name="vomit" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="vomit" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+        <input type="text" id="vomitDetail" name="vomitDetail" placeholder="รายละเอียด...">
+      </div>
+      <div class="symptom-row">
+        <span class="sym-label">คลื่นไส้</span>
+        <div class="radio-inline">
+          <label><input type="radio" name="nausea" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="nausea" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+        <input type="text" id="nauseaDetail" name="nauseaDetail" placeholder="รายละเอียด...">
+      </div>
+      <div class="symptom-row">
+        <span class="sym-label">ท้องเสีย</span>
+        <div class="radio-inline">
+          <label><input type="radio" name="diarrhea" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="diarrhea" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+        <input type="text" id="diarrheaDetail" name="diarrheaDetail" placeholder="รายละเอียด...">
+      </div>
+      <div class="symptom-row">
+        <span class="sym-label">ท้องผูก</span>
+        <div class="radio-inline">
+          <label><input type="radio" name="constipation" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="constipation" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+        <input type="text" id="constipationDetail" name="constipationDetail" placeholder="รายละเอียด...">
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ประวัติสุขภาพ ===== -->
+  <div class="section">
+    <div class="section-title">ประวัติสุขภาพ</div>
+    <div class="field-group">
+      <label class="field-label">3. ปัญหาสุขภาพหรือโรคที่สัตว์เลี้ยงเคยเป็น</label>
+      <textarea id="pastHealth" name="pastHealth" rows="3"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label">4. ปัญหาสุขภาพหรือโรคที่สัตว์เลี้ยงกำลังเป็น</label>
+      <textarea id="currentHealth" name="currentHealth" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ===== การแพ้อาหาร ===== -->
+  <div class="section">
+    <div class="section-title">การแพ้อาหาร</div>
+    <div class="field-group">
+      <label class="field-label">5. สัตว์เลี้ยงเคยผ่านการทดสอบการแพ้อาหาร (Adverse reaction to foods/food allergies) หรือไม่</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="allergyTest" value="ไม่เคยทดสอบ"> ไม่เคยทดสอบ</label>
+        <label><input type="checkbox" name="allergyTest" value="ทดสอบอาหาร (Food elimination test)"> ทดสอบอาหาร (Food elimination test)</label>
+        <label><input type="checkbox" name="allergyTest" value="ตรวจเลือด (IgE test)"> ตรวจเลือด (IgE test)</label>
+        <label><input type="checkbox" name="allergyTest" value="อื่นๆ"> อื่นๆ</label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">รายละเอียดการทดสอบ / อาหารที่แพ้ / อาการ</label>
+      <textarea id="allergyDetail" name="allergyDetail" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ===== ยาและอาหารเสริม ===== -->
+  <div class="section">
+    <div class="section-title">6. ยาและอาหารเสริมที่ให้ในปัจจุบัน</div>
+    <p style="font-size:0.85rem;color:#718096;margin:-8px 0 10px;">รวมถึงยาที่สั่งจ่ายโดยสัตวแพทย์, Flavored medication, วิตามิน, แร่ธาตุ, อาหารเสริมบำรุงข้อ (Joint supplement), กรดไขมัน, ผลิตภัณฑ์สมุนไพร และอื่นๆ</p>
+    <div class="table-wrap">
+      <table id="medTable">
+        <thead>
+          <tr>
+            <th>ผลิตภัณฑ์ / ยี่ห้อ</th>
+            <th>รูปแบบ</th>
+            <th>ปริมาณที่ให้</th>
+            <th>ความถี่</th>
+            <th>เริ่มให้เมื่อ</th>
+            <th style="width:36px;"></th>
+          </tr>
+        </thead>
+        <tbody id="medBody">
+          <tr>
+            <td><input type="text" placeholder="ชื่อผลิตภัณฑ์..."></td>
+            <td><select><option value="">เลือก</option><option>เม็ด</option><option>น้ำ</option><option>ผง</option><option>ชิ้น/ขนม</option><option>อื่นๆ</option></select></td>
+            <td><input type="text" placeholder="ปริมาณ..."></td>
+            <td><input type="text" placeholder="ความถี่..."></td>
+            <td><input type="text" placeholder="วัน/เดือน/ปี"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><select><option value="">เลือก</option><option>เม็ด</option><option>น้ำ</option><option>ผง</option><option>ชิ้น/ขนม</option><option>อื่นๆ</option></select></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><select><option value="">เลือก</option><option>เม็ด</option><option>น้ำ</option><option>ผง</option><option>ชิ้น/ขนม</option><option>อื่นๆ</option></select></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn-addrow" onclick="addRow('medBody', 5)">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- ===== อาหาร ===== -->
+  <div class="section">
+    <div class="section-title">7. อาหารที่สัตว์เลี้ยงได้รับทั้งหมด</div>
+    <p style="font-size:0.85rem;color:#718096;margin:-8px 0 10px;">รวมถึง อาหารคน, ผัก, ผลไม้, ขนม, ขนมขัดฟัน, ขนมขบเคี้ยว, หนังวัว (Rawhide), นม, รวมถึงอาหารหรือผลิตภัณฑ์ที่ใช้เพื่อช่วยในการป้อนยา</p>
+    <div class="table-wrap">
+      <table id="foodTable">
+        <thead>
+          <tr>
+            <th>อาหาร (ยี่ห้อ/รสชาติ/วัตถุดิบ)</th>
+            <th>รูปแบบ</th>
+            <th>ปริมาณที่ให้</th>
+            <th>ความถี่</th>
+            <th>เริ่มให้เมื่อ</th>
+            <th style="width:36px;"></th>
+          </tr>
+        </thead>
+        <tbody id="foodBody">
+          <tr>
+            <td><input type="text" placeholder="ชื่ออาหาร..."></td>
+            <td><select><option value="">เลือก</option><option>เม็ด/แห้ง</option><option>กระป๋อง/เปียก</option><option>ซอง/เปียก</option><option>อาหารสด/โฮมเมด</option><option>ขนม/ทรีต</option><option>อื่นๆ</option></select></td>
+            <td><input type="text" placeholder="ปริมาณ..."></td>
+            <td><input type="text" placeholder="ความถี่..."></td>
+            <td><input type="text" placeholder="วัน/เดือน/ปี"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><select><option value="">เลือก</option><option>เม็ด/แห้ง</option><option>กระป๋อง/เปียก</option><option>ซอง/เปียก</option><option>อาหารสด/โฮมเมด</option><option>ขนม/ทรีต</option><option>อื่นๆ</option></select></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><select><option value="">เลือก</option><option>เม็ด/แห้ง</option><option>กระป๋อง/เปียก</option><option>ซอง/เปียก</option><option>อาหารสด/โฮมเมด</option><option>ขนม/ทรีต</option><option>อื่นๆ</option></select></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+          <tr>
+            <td><input type="text"></td>
+            <td><select><option value="">เลือก</option><option>เม็ด/แห้ง</option><option>กระป๋อง/เปียก</option><option>ซอง/เปียก</option><option>อาหารสด/โฮมเมด</option><option>ขนม/ทรีต</option><option>อื่นๆ</option></select></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><input type="text"></td>
+            <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn-addrow" onclick="addRow('foodBody', 5)">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- ===== บริบทการเลี้ยง ===== -->
+  <div class="section">
+    <div class="section-title">บริบทการเลี้ยงและสภาพแวดล้อม</div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label class="field-label">8. ผู้อยู่อาศัยในบ้าน</label>
+        <div style="display:flex;gap:16px;align-items:center;margin-top:4px;">
+          <label style="white-space:nowrap;">ผู้ใหญ่ <input type="number" id="adults" name="adults" min="0" style="width:60px;display:inline;"> คน</label>
+          <label style="white-space:nowrap;">เด็ก <input type="number" id="children" name="children" min="0" style="width:60px;display:inline;"> คน</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">9. ใครเป็นผู้ให้อาหารสัตว์เลี้ยง</label>
+        <input type="text" id="feeder" name="feeder">
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label class="field-label">10. สัตว์เลี้ยงสามารถเข้าถึงแหล่งอาหารอื่นได้หรือไม่ (ถังขยะ, อาหารนอกบ้าน)</label>
+        <div class="radio-group">
+          <label><input type="radio" name="otherFoodAccess" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="otherFoodAccess" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">11. จำนวนสัตว์เลี้ยงในบ้าน</label>
+        <input type="number" id="numPets" name="numPets" min="1" style="width:80px;">
+      </div>
+    </div>
+
+    <div class="row-3">
+      <div class="field-group">
+        <label class="field-label">12. ใช้ชามอาหารร่วมกัน</label>
+        <div class="radio-group">
+          <label><input type="radio" name="sharedBowl" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="sharedBowl" value="ไม่ใช่"> ไม่ใช่</label>
+          <label><input type="radio" name="sharedBowl" value="ตัวเดียว"> ตัวเดียว</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">13. มีการแย่งอาหาร</label>
+        <div class="radio-group">
+          <label><input type="radio" name="foodCompetition" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="foodCompetition" value="ไม่ใช่"> ไม่ใช่</label>
+          <label><input type="radio" name="foodCompetition" value="ตัวเดียว"> ตัวเดียว</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">14. เข้าถึงอาหารของสัตว์ตัวอื่นได้หรือไม่</label>
+        <div class="radio-group">
+          <label><input type="radio" name="otherPetFood" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="otherPetFood" value="ไม่ใช่"> ไม่ใช่</label>
+          <label><input type="radio" name="otherPetFood" value="ตัวเดียว"> ตัวเดียว</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">15. วิธีการให้น้ำ (เลือกได้มากกว่า 1)</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="water" value="ชามน้ำในบ้าน"> ชามน้ำในบ้าน</label>
+        <label><input type="checkbox" name="water" value="ชามน้ำนอกบ้าน"> ชามน้ำนอกบ้าน</label>
+        <label><input type="checkbox" name="water" value="ขวดน้ำ"> ขวดน้ำ</label>
+        <label><input type="checkbox" name="water" value="น้ำพุ/เครื่องให้น้ำอัตโนมัติ"> น้ำพุ/เครื่องให้น้ำอัตโนมัติ</label>
+        <label><input type="checkbox" name="water" value="อื่นๆ"> อื่นๆ</label>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label class="field-label">16. สัตว์เลี้ยงมีโอกาสดื่มน้ำจากแหล่งอื่น (น้ำบ่อปลา ฯลฯ)</label>
+        <div class="radio-group">
+          <label><input type="radio" name="otherWater" value="ใช่"> ใช่</label>
+          <label><input type="radio" name="otherWater" value="ไม่ใช่"> ไม่ใช่</label>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">17. สัตว์เลี้ยงใช้เวลาส่วนใหญ่อยู่ที่ใด</label>
+        <div class="radio-group">
+          <label><input type="radio" name="location" value="ในบ้าน"> ในบ้าน</label>
+          <label><input type="radio" name="location" value="นอกบ้าน"> นอกบ้าน</label>
+          <label><input type="radio" name="location" value="ทั้งในและนอกบ้าน"> ทั้งในและนอกบ้าน</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">18. การออกกำลังกาย / กิจกรรม</label>
+      <textarea id="exercise" name="exercise" rows="2"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">19. การเปลี่ยนแปลงที่เพิ่งเกิดขึ้นในบ้าน (ก่อสร้าง, สัตว์เลี้ยงใหม่, การตกแต่ง ฯลฯ)</label>
+      <div class="radio-group" style="margin-bottom:8px;">
+        <label><input type="radio" name="recentChange" value="ใช่"> ใช่</label>
+        <label><input type="radio" name="recentChange" value="ไม่ใช่"> ไม่ใช่</label>
+      </div>
+      <input type="text" id="recentChangeDetail" name="recentChangeDetail" placeholder="รายละเอียด (ถ้ามี)...">
+    </div>
+  </div>
+
+  <!-- ===== VET SECTION ===== -->
+  <div class="vet-section">
+    <div class="section-title">VETERINARIAN SECTION</div>
+    <div class="row-3">
+      <div class="field-group">
+        <label class="field-label">Veterinarian</label>
+        <input type="text" id="vetName" name="vetName">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Date</label>
+        <input type="date" id="vetDate" name="vetDate">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Current BW (kg)</label>
+        <input type="number" id="currentBW" name="currentBW" min="0" step="0.01" oninput="calcIdealBW()">
+      </div>
+    </div>
+    <div class="row-3">
+      <div class="field-group">
+        <label class="field-label">BCS (/9)</label>
+        <input type="number" id="bcs" name="bcs" min="1" max="9" step="0.5" oninput="calcIdealBW()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Ideal/Target BW (kg) <span style="font-size:0.8rem;color:#4a7fcb;">(คำนวณอัตโนมัติ)</span>
+          <span style="font-size:0.75rem;color:#718096;display:block;margin-top:1px;">= BW × 100 ÷ [100 + (BCS−5) × 10]</span>
+        </label>
+        <input type="number" id="idealBW" name="idealBW" min="0" step="0.01" oninput="calcRER()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">RER (kcal/day) = BW<sup>0.75</sup> × 70</label>
+        <div class="vet-calc-row">RER = <span id="rerVal">–</span> kcal/วัน</div>
+      </div>
+    </div>
+    <div class="row-3">
+      <div class="field-group">
+        <label class="field-label">Life Stage Factor</label>
+        <select id="lifeStage" name="lifeStage" onchange="updateFactor()">
+          <option value="">-- เลือก Life Stage --</option>
+          <optgroup label="🐱 แมว (Feline)">
+            <option value="1.2">แมวทำหมัน Neutered adult (1.2)</option>
+            <option value="1.4">แมวทำหมัน Neutered adult (1.4)</option>
+            <option value="1.4">แมวไม่ทำหมัน Intact adult (1.4)</option>
+            <option value="1.6">แมวไม่ทำหมัน Intact adult (1.6)</option>
+            <option value="1.0">แมวอ้วน/ขี้เกียจ Inactive/obese prone (1.0)</option>
+            <option value="0.8">แมวลดน้ำหนัก Weight loss (0.8)</option>
+            <option value="1.6">แมวตั้งท้อง Gestation (1.6)</option>
+            <option value="2.0">แมวตั้งท้อง Gestation (2.0)</option>
+            <option value="2.0">แมวให้นม Lactation (2.0)</option>
+            <option value="6.0">แมวให้นม Lactation (6.0)</option>
+            <option value="2.5">แมวลูก Growth (2.5)</option>
+          </optgroup>
+          <optgroup label="🐶 สุนัข (Canine)">
+            <option value="1.4">สุนัขทำหมัน Neutered adult (1.4)</option>
+            <option value="1.6">สุนัขทำหมัน Neutered adult (1.6)</option>
+            <option value="1.6">สุนัขไม่ทำหมัน Intact adult (1.6)</option>
+            <option value="1.8">สุนัขไม่ทำหมัน Intact adult (1.8)</option>
+            <option value="1.0">สุนัขอ้วน/ขี้เกียจ Inactive/obese prone (1.0)</option>
+            <option value="1.2">สุนัขอ้วน/ขี้เกียจ Inactive/obese prone (1.2)</option>
+            <option value="1.0">สุนัขลดน้ำหนัก Weight loss (1.0)</option>
+            <option value="3.0">สุนัขตั้งท้อง Gestation - last 21 days (3.0)</option>
+            <option value="3.0">สุนัขให้นม Lactation (3.0)</option>
+            <option value="6.0">สุนัขให้นม Lactation (≥6.0)</option>
+            <option value="3.0">สุนัขลูก Growth &lt;4 เดือน (3.0)</option>
+            <option value="2.0">สุนัขลูก Growth ≥4 เดือน (2.0)</option>
+            <option value="1.6">สุนัขทำงาน Work - Light (1.6)</option>
+            <option value="3.0">สุนัขทำงาน Work - Moderate (3.0)</option>
+            <option value="6.0">สุนัขทำงาน Work - Heavy (6.0)</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Factor ที่ใช้ <span style="font-size:0.8rem;color:#4a7fcb;">(แก้ไขได้)</span></label>
+        <input type="number" id="factor" name="factor" min="0" step="0.1" oninput="calcDER()">
+      </div>
+      <div class="field-group">
+        <label class="field-label">DER / MER (kcal/day) = RER × Factor</label>
+        <div class="vet-calc-row">DER = <span id="derVal">–</span> kcal/วัน</div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Note / Feeding Plan</label>
+      <textarea id="vetNote" name="vetNote" rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- ===== Buttons ===== -->
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="resetForm()">🔄 ล้างแบบฟอร์ม</button>
+    <button class="btn btn-pdf" onclick="exportPDF()">⬇ ดาวน์โหลด PDF</button>
+    <button class="btn btn-primary" id="btnSubmit" onclick="submitForm()">💾 บันทึกข้อมูล</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNaaHfuVTuRso6Pv1YLYCetCk-2kv6YThWdfCzoc3KIhNXDR9Zp2t_5hvIkehjWHqh/exec';
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type = '', duration = 3500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type ? `show ${type}` : 'show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, duration);
+}
+
+// ============================================================
+// TABLE HELPERS
+// ============================================================
+function addRow(tbodyId, cols) {
+  const tbody = document.getElementById(tbodyId);
+  const isFood = tbodyId === 'foodBody';
+  const opts = isFood
+    ? ['', 'เม็ด/แห้ง', 'กระป๋อง/เปียก', 'ซอง/เปียก', 'อาหารสด/โฮมเมด', 'ขนม/ทรีต', 'อื่นๆ']
+    : ['', 'เม็ด', 'น้ำ', 'ผง', 'ชิ้น/ขนม', 'อื่นๆ'];
+  const optHTML = opts.map(o => `<option>${o}</option>`).join('');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text"></td>
+    <td><select>${optHTML}</select></td>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+    <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function delRow(btn) {
+  const tbody = btn.closest('tbody');
+  if (tbody.rows.length > 1) {
+    btn.closest('tr').remove();
+  } else {
+    // Clear inputs instead of deleting last row
+    btn.closest('tr').querySelectorAll('input').forEach(i => i.value = '');
+    btn.closest('tr').querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+  }
+}
+
+function getTableData(tbodyId) {
+  const rows = [];
+  document.querySelectorAll(`#${tbodyId} tr`).forEach(tr => {
+    const cells = tr.querySelectorAll('input, select');
+    const vals = Array.from(cells).map(c => c.value.trim());
+    if (vals.some(v => v && v !== '')) rows.push(vals.join(' | '));
+  });
+  return rows.join('\n');
+}
+
+function setTableData(tbodyId, dataStr) {
+  if (!dataStr) return;
+  const tbody = document.getElementById(tbodyId);
+  const isFood = tbodyId === 'foodBody';
+  const opts = isFood
+    ? ['', 'เม็ด/แห้ง', 'กระป๋อง/เปียก', 'ซอง/เปียก', 'อาหารสด/โฮมเมด', 'ขนม/ทรีต', 'อื่นๆ']
+    : ['', 'เม็ด', 'น้ำ', 'ผง', 'ชิ้น/ขนม', 'อื่นๆ'];
+  const optHTML = opts.map(o => `<option>${o}</option>`).join('');
+
+  tbody.innerHTML = '';
+  const rows = dataStr.split('\n');
+  rows.forEach(row => {
+    const parts = row.split(' | ');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${escHtml(parts[0]||'')}"></td>
+      <td><select>${optHTML}</select></td>
+      <td><input type="text" value="${escHtml(parts[2]||'')}"></td>
+      <td><input type="text" value="${escHtml(parts[3]||'')}"></td>
+      <td><input type="text" value="${escHtml(parts[4]||'')}"></td>
+      <td><button class="btn-delrow" onclick="delRow(this)" title="ลบแถว">✕</button></td>`;
+    const sel = tr.querySelector('select');
+    sel.value = parts[1] || '';
+    tbody.appendChild(tr);
+  });
+  if (tbody.rows.length === 0) addRow(tbodyId, 5);
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================
+// RER / DER CALCULATION
+// ============================================================
+function calcIdealBW() {
+  const bw  = parseFloat(document.getElementById('currentBW').value);
+  const bcs = parseFloat(document.getElementById('bcs').value);
+  if (bw > 0 && bcs >= 1 && bcs <= 9) {
+    // Target weight = Starting weight × 100 / [100 + (Starting BCS − 5) × 10]
+    const ideal = bw * 100 / (100 + (bcs - 5) * 10);
+    document.getElementById('idealBW').value = Math.round(ideal * 100) / 100;
+  }
+  calcRER();
+}
+
+function calcRER() {
+  const bw = parseFloat(document.getElementById('idealBW').value) ||
+             parseFloat(document.getElementById('currentBW').value);
+  if (bw > 0) {
+    const rer = Math.round(70 * Math.pow(bw, 0.75));
+    document.getElementById('rerVal').textContent = rer;
+    calcDER();
+  } else {
+    document.getElementById('rerVal').textContent = '–';
+    document.getElementById('derVal').textContent = '–';
+  }
+}
+
+function updateFactor() {
+  const sel = document.getElementById('lifeStage');
+  const val = sel.options[sel.selectedIndex]?.value;
+  if (val) {
+    document.getElementById('factor').value = val;
+    calcDER();
+  }
+}
+
+function calcDER() {
+  const rerText = document.getElementById('rerVal').textContent;
+  const rer = parseFloat(rerText);
+  const factor = parseFloat(document.getElementById('factor').value);
+  if (!isNaN(rer) && factor > 0) {
+    document.getElementById('derVal').textContent = Math.round(rer * factor);
+  } else {
+    document.getElementById('derVal').textContent = '–';
+  }
+}
+
+// ============================================================
+// COLLECT FORM DATA
+// ============================================================
+function collectFormData() {
+  const radio = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || '';
+  const checkboxes = (name) => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(c => c.value).join(', ');
+  const val = (id) => (document.getElementById(id) || {}).value || '';
+
+  return {
+    hn: val('hn'),
+    recordDate: val('recordDate'),
+    ownerName: val('ownerName'),
+    petName: val('petName'),
+    species: val('species'),
+    age: val('age'),
+    sex: radio('sex'),
+    neuter: radio('neuter'),
+    bodyShape: radio('bodyShape'),
+    vomit: radio('vomit'),
+    vomitDetail: val('vomitDetail'),
+    nausea: radio('nausea'),
+    nauseaDetail: val('nauseaDetail'),
+    diarrhea: radio('diarrhea'),
+    diarrheaDetail: val('diarrheaDetail'),
+    constipation: radio('constipation'),
+    constipationDetail: val('constipationDetail'),
+    pastHealth: val('pastHealth'),
+    currentHealth: val('currentHealth'),
+    allergyTest: checkboxes('allergyTest'),
+    allergyDetail: val('allergyDetail'),
+    medications: getTableData('medBody'),
+    foods: getTableData('foodBody'),
+    adults: val('adults'),
+    children: val('children'),
+    feeder: val('feeder'),
+    otherFoodAccess: radio('otherFoodAccess'),
+    numPets: val('numPets'),
+    sharedBowl: radio('sharedBowl'),
+    foodCompetition: radio('foodCompetition'),
+    otherPetFood: radio('otherPetFood'),
+    waterMethods: checkboxes('water'),
+    otherWater: radio('otherWater'),
+    location: radio('location'),
+    exercise: val('exercise'),
+    recentChange: radio('recentChange'),
+    recentChangeDetail: val('recentChangeDetail'),
+    vetName: val('vetName'),
+    vetDate: val('vetDate'),
+    currentBW: val('currentBW'),
+    bcs: val('bcs'),
+    idealBW: val('idealBW'),
+    rer: document.getElementById('rerVal').textContent,
+    lifeStage: (document.getElementById('lifeStage').options[document.getElementById('lifeStage').selectedIndex] || {}).text || '',
+    factor: val('factor'),
+    der: document.getElementById('derVal').textContent,
+    vetNote: val('vetNote'),
+  };
+}
+
+// ============================================================
+// POPULATE FORM FROM LOADED DATA
+// ============================================================
+function populateForm(data) {
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  const setRadio = (name, val) => {
+    const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+    if (el) el.checked = true;
+  };
+  const setCheckboxes = (name, valStr) => {
+    const vals = (valStr || '').split(', ').map(v => v.trim());
+    document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+      cb.checked = vals.includes(cb.value);
+    });
+  };
+
+  setVal('hn', data.hn);
+  setVal('recordDate', data.recordDate);
+  setVal('ownerName', data.ownerName);
+  setVal('petName', data.petName);
+  setVal('species', data.species);
+  setVal('age', data.age);
+  setRadio('sex', data.sex);
+  setRadio('neuter', data.neuter);
+  setRadio('bodyShape', data.bodyShape);
+  setRadio('vomit', data.vomit);
+  setVal('vomitDetail', data.vomitDetail);
+  setRadio('nausea', data.nausea);
+  setVal('nauseaDetail', data.nauseaDetail);
+  setRadio('diarrhea', data.diarrhea);
+  setVal('diarrheaDetail', data.diarrheaDetail);
+  setRadio('constipation', data.constipation);
+  setVal('constipationDetail', data.constipationDetail);
+  setVal('pastHealth', data.pastHealth);
+  setVal('currentHealth', data.currentHealth);
+  setCheckboxes('allergyTest', data.allergyTest);
+  setVal('allergyDetail', data.allergyDetail);
+  setTableData('medBody', data.medications);
+  setTableData('foodBody', data.foods);
+  setVal('adults', data.adults);
+  setVal('children', data.children);
+  setVal('feeder', data.feeder);
+  setRadio('otherFoodAccess', data.otherFoodAccess);
+  setVal('numPets', data.numPets);
+  setRadio('sharedBowl', data.sharedBowl);
+  setRadio('foodCompetition', data.foodCompetition);
+  setRadio('otherPetFood', data.otherPetFood);
+  setCheckboxes('water', data.waterMethods);
+  setRadio('otherWater', data.otherWater);
+  setRadio('location', data.location);
+  setVal('exercise', data.exercise);
+  setRadio('recentChange', data.recentChange);
+  setVal('recentChangeDetail', data.recentChangeDetail);
+  setVal('vetName', data.vetName);
+  setVal('vetDate', data.vetDate);
+  setVal('currentBW', data.currentBW);
+  setVal('bcs', data.bcs);
+  setVal('idealBW', data.idealBW);
+  setVal('factor', data.factor);
+  setVal('vetNote', data.vetNote);
+
+  calcRER();
+  calcDER();
+}
+
+// ============================================================
+// LOAD BY HN
+// ============================================================
+async function loadByHN() {
+  const hn = document.getElementById('hn').value.trim();
+  if (!hn) {
+    showToast('กรุณากรอกหมายเลข HN ก่อน', 'error');
+    return;
+  }
+
+  const status = document.getElementById('hnStatus');
+  const btn = document.getElementById('btnLoad');
+  status.textContent = '⏳ กำลังค้นหาข้อมูล...';
+  status.className = 'hn-status loading';
+  btn.disabled = true;
+
+  try {
+    const url = `${APPS_SCRIPT_URL}?action=getByHN&hn=${encodeURIComponent(hn)}`;
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (json.status === 'found') {
+      populateForm(json.data);
+      status.textContent = `✅ พบข้อมูล HN ${hn} — โหลดเรียบร้อยแล้ว สามารถแก้ไขและบันทึกได้`;
+      status.className = 'hn-status found';
+      showToast(`✅ โหลดข้อมูล HN ${hn} สำเร็จ`, 'success');
+    } else if (json.status === 'notfound') {
+      status.textContent = `ℹ️ ไม่พบข้อมูล HN ${hn} ในระบบ — สามารถกรอกข้อมูลใหม่ได้เลย`;
+      status.className = 'hn-status notfound';
+    } else {
+      throw new Error(json.message || 'Unknown error');
+    }
+  } catch (err) {
+    status.textContent = `❌ เกิดข้อผิดพลาด: ${err.message}`;
+    status.className = 'hn-status error';
+    showToast('ไม่สามารถโหลดข้อมูลได้', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Allow pressing Enter in HN field
+document.getElementById('hn').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') loadByHN();
+});
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submitForm() {
+  const hn = document.getElementById('hn').value.trim();
+  if (!hn) {
+    showToast('กรุณากรอกหมายเลข HN ก่อนบันทึก', 'error');
+    document.getElementById('hn').focus();
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = '⏳ กำลังบันทึก...';
+
+  try {
+    const formData = collectFormData();
+    const payload = JSON.stringify({ action: 'save', data: formData });
+
+    // Use no-cors POST to avoid CORS preflight issues with Apps Script
+    // no-cors means we can't read the response, so we use a GET ping to verify
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: payload
+    });
+
+    // After POST (no-cors), verify by loading HN back
+    const hn = formData.hn;
+    let verified = false;
+    if (hn) {
+      try {
+        const check = await fetch(`${APPS_SCRIPT_URL}?action=getByHN&hn=${encodeURIComponent(hn)}`);
+        const checkJson = await check.json();
+        verified = (checkJson.status === 'found');
+      } catch(_) {}
+    }
+
+    if (verified) {
+      showToast('✅ บันทึกข้อมูลเรียบร้อยแล้ว', 'success', 4000);
+    } else {
+      // Fallback: try GET with payload (short enough for simple records)
+      const url = APPS_SCRIPT_URL + '?payload=' + encodeURIComponent(payload);
+      const res = await fetch(url, { redirect: 'follow' });
+      const text = await res.text();
+      let json;
+      try { json = JSON.parse(text); } catch(_) {
+        throw new Error('Server response is not JSON: ' + text.slice(0, 200));
+      }
+      if (json.status === 'success') {
+        showToast('✅ บันทึกข้อมูลเรียบร้อยแล้ว', 'success', 4000);
+      } else {
+        throw new Error(json.message || 'Save failed');
+      }
+    }
+  } catch (err) {
+    showToast(`❌ บันทึกไม่สำเร็จ: ${err.message}`, 'error', 5000);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '💾 บันทึกข้อมูล';
+  }
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetForm() {
+  if (!confirm('ล้างแบบฟอร์มทั้งหมด?')) return;
+  document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(el => el.value = '');
+  document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(el => el.checked = false);
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  ['rerVal','derVal'].forEach(id => document.getElementById(id).textContent = '–');
+  document.getElementById('hnStatus').textContent = '';
+  document.getElementById('hnStatus').className = 'hn-status';
+  // Reset tables
+  ['medBody','foodBody'].forEach(id => {
+    const tbody = document.getElementById(id);
+    tbody.querySelectorAll('tr').forEach((tr, i) => {
+      if (i > 2) tr.remove();
+      else {
+        tr.querySelectorAll('input').forEach(inp => inp.value = '');
+        tr.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+      }
+    });
+  });
+  showToast('ล้างแบบฟอร์มเรียบร้อย');
+}
+
+// ============================================================
+// PDF EXPORT — popup window print, Thai-safe, 1 page A4
+// ============================================================
+function exportPDF() {
+  const data = collectFormData();
+  const hn      = data.hn      || '–';
+  const petName = data.petName || '–';
+  const recDate = data.recordDate || new Date().toISOString().slice(0,10);
+
+  const esc = (s) => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const v   = (s) => esc(s) || '<span style="color:#ccc">–</span>';
+  const f   = (label, val) =>
+    `<div class="f"><b class="fl">${label}:</b><span class="fv">${v(val)}</span></div>`;
+
+  const sym = (name, detailId) => {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    const d  = document.getElementById(detailId)?.value || '';
+    return (el ? el.value : '') + (d ? ` (${d})` : '');
+  };
+
+  const tableHTML = (tbodyId, headers) => {
+    const rows = [];
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(tr => {
+      const vals = Array.from(tr.querySelectorAll('input,select')).map(c => esc(c.value.trim()));
+      if (vals.some(x => x)) rows.push(vals.slice(0, headers.length));
+    });
+    if (!rows.length) return '<p class="nd">ไม่มีข้อมูล</p>';
+    return `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>`
+      + `<tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  };
+
+  const rerVal = document.getElementById('rerVal').textContent;
+  const derVal = document.getElementById('derVal').textContent;
+  const lsEl   = document.getElementById('lifeStage');
+  const lsText = lsEl.options[lsEl.selectedIndex]?.text || '';
+
+  const body = `
+  <div class="ph">
+    <div>
+      <div class="ptitle">แบบฟอร์มบันทึกประวัติอาหาร</div>
+      <div class="psub">โรงพยาบาลสัตว์ คณะสัตวแพทยศาสตร์ มหาวิทยาลัยสงขลานครินทร์</div>
+    </div>
+    <div class="phn"><strong>HN: ${esc(hn)}</strong><br>สัตว์: ${esc(petName)} | วันที่: ${recDate}</div>
+  </div>
+
+  <div class="sec"><div class="st">1. ข้อมูลทั่วไป</div>
+    <div class="g3">
+      ${f('วันที่บันทึก',data.recordDate)}${f('ชื่อเจ้าของ',data.ownerName)}${f('ชื่อสัตว์',data.petName)}
+      ${f('ชนิด/สายพันธุ์',data.species)}${f('อายุ',data.age)}${f('เพศ',data.sex)}
+      ${f('การทำหมัน',data.neuter)}${f('รูปร่าง',data.bodyShape)}
+    </div>
+  </div>
+
+  <div class="sec"><div class="st">2. อาการที่สังเกตได้</div>
+    <div class="g2">
+      ${f('อาเจียน',sym('vomit','vomitDetail'))}${f('คลื่นไส้',sym('nausea','nauseaDetail'))}
+      ${f('ท้องเสีย',sym('diarrhea','diarrheaDetail'))}${f('ท้องผูก',sym('constipation','constipationDetail'))}
+    </div>
+  </div>
+
+  <div class="sec"><div class="st">3. ประวัติสุขภาพ</div>
+    <div class="g2">
+      ${f('ปัญหาสุขภาพที่เคยเป็น',data.pastHealth)}${f('ปัญหาสุขภาพปัจจุบัน',data.currentHealth)}
+      ${f('การทดสอบการแพ้อาหาร',data.allergyTest)}${f('รายละเอียดการแพ้',data.allergyDetail)}
+    </div>
+  </div>
+
+  <div class="sec"><div class="st">4. ยาและอาหารเสริม</div>
+    ${tableHTML('medBody',['ผลิตภัณฑ์/ยี่ห้อ','รูปแบบ','ปริมาณ','ความถี่','เริ่มให้เมื่อ'])}
+  </div>
+
+  <div class="sec"><div class="st">5. อาหารที่ได้รับทั้งหมด</div>
+    ${tableHTML('foodBody',['อาหาร (ยี่ห้อ/รสชาติ/วัตถุดิบ)','รูปแบบ','ปริมาณ','ความถี่','เริ่มให้เมื่อ'])}
+  </div>
+
+  <div class="sec"><div class="st">6. บริบทการเลี้ยงและสภาพแวดล้อม</div>
+    <div class="g3">
+      ${f('ผู้ใหญ่ในบ้าน',data.adults)}${f('เด็กในบ้าน',data.children)}${f('ผู้ให้อาหาร',data.feeder)}
+      ${f('เข้าถึงอาหารภายนอก',data.otherFoodAccess)}${f('จำนวนสัตว์เลี้ยง',data.numPets)}${f('ใช้ชามร่วมกัน',data.sharedBowl)}
+      ${f('มีการแย่งอาหาร',data.foodCompetition)}${f('เข้าถึงอาหารสัตว์อื่น',data.otherPetFood)}${f('วิธีให้น้ำ',data.waterMethods)}
+      ${f('ดื่มน้ำจากแหล่งอื่น',data.otherWater)}${f('สภาพแวดล้อม',data.location)}${f('การออกกำลังกาย',data.exercise)}
+    </div>
+    ${f('การเปลี่ยนแปลงล่าสุด', data.recentChange+(data.recentChangeDetail?': '+data.recentChangeDetail:''))}
+  </div>
+
+  <div class="vbox">
+    <div class="st green">7. Veterinarian Section</div>
+    <div class="g3" style="margin-top:3px">
+      ${f('Veterinarian',data.vetName)}${f('Date',data.vetDate)}${f('Current BW (kg)',data.currentBW)}
+      ${f('BCS (/9)',data.bcs)}${f('Ideal BW (kg)',data.idealBW)}${f('RER (kcal/day)',rerVal!=='–'?rerVal:'')}
+      ${f('Life Stage',lsText)}${f('Factor',data.factor)}${f('DER (kcal/day)',derVal!=='–'?derVal:'')}
+    </div>
+    <div style="margin-top:3px"><b class="fl">Note / Feeding Plan:</b>
+      <div class="nbox">${v(data.vetNote)}</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>PSU Veterinary Hospital – Nutrition Clinic</span>
+    <span>พิมพ์: ${new Date().toLocaleString('th-TH')}</span>
+  </div>`;
+
+  const css = `
+    @page { size: A4 portrait; margin: 8mm 10mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Sarabun','Noto Sans Thai',sans-serif; font-size: 8.5pt; color: #111; margin: 0; padding: 0; }
+    .ph  { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #1a4b8c; padding-bottom:4px; margin-bottom:5px; }
+    .ptitle { font-size:11pt; font-weight:700; color:#1a4b8c; }
+    .psub   { font-size:7.5pt; color:#5a7bb5; }
+    .phn    { font-size:8pt; color:#333; text-align:right; line-height:1.6; }
+    .sec    { margin-bottom:4px; }
+    .st     { background:#1a4b8c; color:#fff; font-weight:700; font-size:8pt; padding:2px 6px; margin-bottom:3px; }
+    .st.green { background:#276129; }
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:1px 10px; }
+    .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px 6px; }
+    .f  { display:flex; gap:3px; min-height:13px; flex-wrap:wrap; align-items:baseline; }
+    .fl { font-weight:700; color:#444; white-space:nowrap; font-size:7.5pt; }
+    .fv { color:#111; font-size:8pt; word-break:break-word; }
+    table { width:100%; border-collapse:collapse; font-size:7.5pt; margin-bottom:2px; }
+    th  { background:#eef4ff; color:#1a4b8c; font-weight:700; padding:2px 4px; border:1px solid #c3d4f0; text-align:left; }
+    td  { padding:2px 4px; border:1px solid #e2e8f0; vertical-align:top; }
+    tr:nth-child(even) td { background:#f8faff; }
+    .vbox { background:#f0f7f0; border:1.5px solid #68a76a; border-radius:4px; padding:4px 6px; margin-top:3px; }
+    .nbox { border:1px solid #c3d4f0; padding:3px 5px; min-height:18px; font-size:8pt; margin-top:2px; background:#f9fbff; }
+    .nd   { color:#888; font-style:italic; font-size:7.5pt; margin:1px 0 2px 4px; }
+    .foot { border-top:1px solid #ccc; margin-top:4px; padding-top:2px; font-size:6.5pt; color:#999; display:flex; justify-content:space-between; }
+  `;
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Diet History – ${esc(hn)}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>${css}</style>
+  </head><body>${body}</body></html>`);
+  win.document.close();
+
+  // Wait for font to load then print
+  win.onload = () => {
+    win.focus();
+    setTimeout(() => win.print(), 600);
+  };
+}
+
+// Set today's date as default
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('recordDate').value = today;
+  document.getElementById('vetDate').value = today;
+});
+</script>
+</body>
+</html>
